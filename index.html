@@ -90,7 +90,9 @@ nav{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;
 .proj-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(234,234,230,.25);padding:0 48px;margin-bottom:8px}
 .proj-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,68px);font-weight:300;letter-spacing:-1.5px;color:rgba(234,234,230,.9);padding:0 48px;margin-bottom:48px}
 
-#projCanvas{width:100%;display:block;cursor:none}
+.proj-canvas-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.proj-canvas-wrap::-webkit-scrollbar{display:none}
+#projCanvas{display:block;cursor:none}
 .proj-hint{text-align:center;font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.18);margin-top:32px;padding:0 48px}
 
 /* ── MOBILE PROJECT CARDS ───────────────────────── */
@@ -294,8 +296,8 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
 <section id="proyectos">
   <div class="rvl"><div class="rvl-i"><p class="proj-label">Nuestro trabajo</p></div></div>
   <div class="rvl"><div class="rvl-i"><h2 class="proj-heading">Proyectos</h2></div></div>
-  <canvas id="projCanvas"></canvas>
-  <p class="proj-hint">Hover para explorar · Click para abrir</p>
+  <div class="proj-canvas-wrap"><canvas id="projCanvas"></canvas></div>
+  <p class="proj-hint" id="projHint">Hover para explorar · Click para abrir</p>
   <div id="projCards"></div>
 </section>
 
@@ -584,16 +586,20 @@ function makeIsoCanvas(canvasId, opts) {
   }
 
   function resize(){
-    W=canvas.clientWidth;
-    S = W < 768
-      ? Math.max(28, Math.min(40, W/12))
-      : Math.max(20, Math.min(38, W/42));
-    const gridH=TR*S+S*2;
-    H=Math.max(gridH+80,320);
-    canvas.style.height=H+'px';
-    iso.resize(W,H);
-    offX=W/2;
-    offY=H*.06+S;
+    const isMob = window.innerWidth < 768;
+    S = isMob ? 32 : Math.max(20, Math.min(38, window.innerWidth/42));
+    // full isometric grid span
+    const spanW = (TC + TR) * S + S * 4;
+    W = isMob ? spanW : canvas.parentElement.clientWidth;
+    canvas.style.width = W + 'px';
+    const gridH = TR * S + S * 2;
+    H = Math.max(gridH + 80, 320);
+    canvas.style.height = H + 'px';
+    iso.resize(W, H);
+    offX = W / 2;
+    offY = H * .06 + S;
+    // on mobile start scroll at center so tiles are visible immediately
+    if(isMob) canvas.parentElement.scrollLeft = (W - window.innerWidth) / 2;
 
     tiles=[];
     for(let r=0;r<TR;r++)
@@ -682,11 +688,22 @@ function makeIsoCanvas(canvasId, opts) {
     mouse={x:e.clientX-r.left,y:e.clientY-r.top};
   });
   canvas.addEventListener('mouseleave',()=>{mouse={x:-9999,y:-9999};hovProj=-1;cr.classList.remove('project')});
-  canvas.addEventListener('click',()=>{if(hovProj>=0)openProject(hovProj)});
+  canvas.addEventListener('click',e=>{
+    if(hovProj>=0) openProject(hovProj);
+  });
+  canvas.addEventListener('touchend',e=>{
+    if(hovProj>=0){ e.preventDefault(); openProject(hovProj); }
+  },{passive:false});
 
-  resize();
-  window.addEventListener('resize',()=>{resize()});
-  (function loop(){update();draw();requestAnimationFrame(loop)})();
+  // update hint text on mobile
+  if(window.innerWidth<768) document.getElementById('projHint').textContent='Deslizá para explorar · Tocá para abrir';
+
+  // wait for fonts then start
+  document.fonts.ready.then(()=>{
+    resize();
+    window.addEventListener('resize',()=>resize());
+    (function loop(){update();draw();requestAnimationFrame(loop)})();
+  });
 })();
 
 // ── PROJECT DETAIL ────────────────────────────────
