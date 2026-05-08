@@ -96,14 +96,15 @@ nav{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;
 .proj-hint{text-align:center;font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.18);margin-top:32px;padding:0 48px}
 
 /* ── MOBILE PROJECT CARDS ───────────────────────── */
-#projCards{display:none;padding:0 20px 8px;grid-template-columns:1fr 1fr;gap:2px}
-.pc{position:relative;overflow:hidden;cursor:pointer;aspect-ratio:3/4;background:#111}
-.pc img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
-.pc:active img{transform:scale(1.04)}
-.pc-over{position:absolute;inset:0;padding:18px 16px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.1) 60%,transparent 100%)}
-.pc-num{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:rgba(234,234,230,.2);line-height:1;letter-spacing:-1px}
-.pc-cat{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
-.pc-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(234,234,230,.95);letter-spacing:-.2px;line-height:1.1;margin-top:2px}
+#projCards{display:none;grid-template-columns:1fr 1fr;gap:1px;background:rgba(234,234,230,.06)}
+.pc{position:relative;overflow:hidden;aspect-ratio:4/5;background:#0e0e0e;-webkit-tap-highlight-color:transparent}
+.pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;transition:opacity .4s,transform .4s}
+.pc:active img{opacity:.7;transform:scale(1.03)}
+.pc-over{position:absolute;inset:0;padding:20px 18px;display:flex;flex-direction:column;justify-content:flex-end}
+.pc-bar{width:28px;height:2px;margin-bottom:14px;transition:width .3s}
+.pc-num{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:300;color:rgba(234,234,230,.25);letter-spacing:2px}
+.pc-name{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,4.5vw,22px);font-weight:300;color:rgba(234,234,230,.92);letter-spacing:-.2px;line-height:1.1;margin-top:4px}
+.pc-cat{font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-top:8px;opacity:.8}
 
 /* ── PROJECT DETAIL OVERLAY ─────────────────────── */
 #projDetail{
@@ -232,6 +233,8 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
 }
 @media(max-width:768px){
   #mobileMenu{display:flex}
+  .proj-canvas-wrap,#projCanvas,.proj-hint{display:none}
+  #projCards{display:grid}
 }
 </style>
 </head>
@@ -753,9 +756,10 @@ document.addEventListener('keydown',e=>{
     card.innerHTML = `
       <img src="${p.img}" alt="${p.name}" loading="lazy">
       <div class="pc-over">
+        <div class="pc-bar" style="background:rgb(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]})"></div>
         <div class="pc-num">${String(i+1).padStart(2,'0')}</div>
-        <div class="pc-cat" style="color:rgb(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]})">${p.cat.toUpperCase()}</div>
         <div class="pc-name">${p.name}</div>
+        <div class="pc-cat" style="color:rgb(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]})">${p.cat}</div>
       </div>`;
     card.addEventListener('click', () => openProject(i));
     grid.appendChild(card);
