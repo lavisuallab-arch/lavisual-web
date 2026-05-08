@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAVISUAL — Estudio de Arquitectura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:   #EAEAE6;
+  --dark: #080808;
+  --off:  #F0EFEB;
+  --blue: #006199;
+  --yel:  #E6C83C;
+  --pur:  #6E3470;
+  --red:  #C73531;
+  --iso:  #4535AE;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--dark);overflow-x:hidden;cursor:none}
+@media(hover:none){body{cursor:auto}}
+
+/* ── CURSOR ─────────────────────────────────────── */
+#cd,#cr{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:left,top}
+#cd{width:5px;height:5px;background:var(--dark);transition:background .25s}
+#cr{width:34px;height:34px;border:1.5px solid rgba(10,10,10,.3);transition:width .4s cubic-bezier(.23,1,.32,1),height .4s,border-color .3s}
+#cr.big{width:64px;height:64px;border-color:var(--iso)}
+#cr.inv{border-color:rgba(234,234,230,.45)}
+#cd.inv{background:rgba(234,234,230,.9)}
+#cr.project{width:80px;height:80px;border-color:rgba(234,234,230,.6)}
+
+/* ── PROGRESS ───────────────────────────────────── */
+#prog{position:fixed;top:0;left:0;height:2px;background:var(--iso);z-index:9998;width:0%;pointer-events:none}
+
+/* ── NAV ────────────────────────────────────────── */
+nav{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;z-index:500;mix-blend-mode:difference}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;letter-spacing:5px;text-transform:uppercase;color:#fff;text-decoration:none}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-ham span{display:block;width:22px;height:1px;background:#fff}
+
+/* ── HERO (light) ───────────────────────────────── */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);position:relative}
+.hero::after{content:'';position:absolute;bottom:0;left:50%;width:1px;height:55%;background:rgba(10,10,10,.1);pointer-events:none}
+
+.hero-left{padding:100px 48px 72px;display:flex;flex-direction:column;justify-content:flex-end}
+.hero-tag{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(10,10,10,.35);margin-bottom:20px}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,9vw,128px);font-weight:300;line-height:.88;letter-spacing:-3px;color:var(--dark)}
+.hero-title .ch{display:inline-block;opacity:0;transform:translateY(50px);transition:opacity .6s ease,transform .6s cubic-bezier(.23,1,.32,1)}
+.hero-title .ch.in{opacity:1;transform:translateY(0)}
+.hero-div{width:36px;height:2px;background:var(--iso);margin:32px 0 24px}
+.hero-sub{font-size:14px;font-weight:300;color:rgba(10,10,10,.4);line-height:1.75;max-width:280px;opacity:0;transform:translateY(12px);transition:opacity .7s .9s ease,transform .7s .9s ease}
+.hero-sub.in{opacity:1;transform:translateY(0)}
+.hero-scroll{font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(10,10,10,.2);margin-top:48px;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .7s 1.15s ease}
+.hero-scroll.in{opacity:1}
+.hero-scroll::before{content:'';width:30px;height:1px;background:rgba(10,10,10,.15);display:block}
+
+.hero-right{overflow:hidden}
+#heroCanvas{width:100%;height:100%;display:block}
+
+/* ── MARQUEE ────────────────────────────────────── */
+.mq{background:var(--dark);overflow:hidden;height:38px;display:flex;align-items:center}
+.mq-track{display:flex;animation:mq 26s linear infinite;white-space:nowrap}
+.mq-track span{font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);padding:0 22px}
+.mq-track span.sep{color:rgba(255,255,255,.15);padding:0}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── PROJECTS SECTION ───────────────────────────── */
+#proyectos{background:var(--dark);position:relative;padding:72px 0 80px}
+.proj-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(234,234,230,.25);padding:0 48px;margin-bottom:8px}
+.proj-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,68px);font-weight:300;letter-spacing:-1.5px;color:rgba(234,234,230,.9);padding:0 48px;margin-bottom:48px}
+
+#projCanvas{width:100%;display:block;cursor:none}
+.proj-hint{text-align:center;font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.18);margin-top:32px;padding:0 48px}
+
+/* ── MOBILE PROJECT CARDS ───────────────────────── */
+#projCards{display:none;padding:0 20px 8px;grid-template-columns:1fr 1fr;gap:2px}
+.pc{position:relative;overflow:hidden;cursor:pointer;aspect-ratio:3/4;background:#111}
+.pc img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pc:active img{transform:scale(1.04)}
+.pc-over{position:absolute;inset:0;padding:18px 16px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.1) 60%,transparent 100%)}
+.pc-num{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:rgba(234,234,230,.2);line-height:1;letter-spacing:-1px}
+.pc-cat{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+.pc-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(234,234,230,.95);letter-spacing:-.2px;line-height:1.1;margin-top:2px}
+
+/* ── PROJECT DETAIL OVERLAY ─────────────────────── */
+#projDetail{
+  position:fixed;inset:0;
+  background:var(--dark);
+  z-index:1000;
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  transform:translateY(100%);
+  transition:transform .75s cubic-bezier(.23,1,.32,1);
+  overflow:hidden;
+}
+#projDetail.open{transform:translateY(0)}
+
+.pd-img-wrap{position:relative;overflow:hidden;background:#111}
+.pd-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.04);transition:transform 1s ease}
+#projDetail.open .pd-img-wrap img{transform:scale(1)}
+
+.pd-info{padding:72px 52px 52px;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;border-left:1px solid rgba(234,234,230,.06)}
+.pd-top{}
+.pd-num{font-family:'Cormorant Garamond',serif;font-size:80px;font-weight:300;color:rgba(234,234,230,.08);line-height:1;display:block;letter-spacing:-3px}
+.pd-cat{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-top:20px;display:block}
+.pd-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,3.5vw,52px);font-weight:300;letter-spacing:-1px;color:rgba(234,234,230,.95);line-height:1.1;margin-top:10px}
+.pd-meta{display:flex;gap:24px;margin-top:20px;padding-top:20px;border-top:1px solid rgba(234,234,230,.08)}
+.pd-meta span{font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:rgba(234,234,230,.35)}
+.pd-desc{font-size:14px;font-weight:300;line-height:1.85;color:rgba(234,234,230,.45);margin-top:28px;max-width:380px}
+.pd-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:48px}
+.pd-nav{display:flex;gap:16px}
+.pd-btn{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.4);background:none;border:1px solid rgba(234,234,230,.12);padding:10px 20px;cursor:none;transition:all .2s}
+.pd-btn:hover{color:rgba(234,234,230,.9);border-color:rgba(234,234,230,.3)}
+.pd-close{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.35);background:none;border:none;cursor:none;transition:color .2s;padding:0}
+.pd-close:hover{color:rgba(234,234,230,.9)}
+
+/* ── SERVICIOS ──────────────────────────────────── */
+#servicios{background:var(--dark);padding:96px 48px;border-top:1px solid rgba(234,234,230,.06)}
+.sec-label-d{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(234,234,230,.25)}
+.sec-title-d{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,66px);font-weight:300;letter-spacing:-1.5px;color:rgba(234,234,230,.9);margin-top:10px;margin-bottom:56px}
+
+.serv-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(234,234,230,.06)}
+.si{padding:52px 48px;background:var(--dark);cursor:none;overflow:hidden;position:relative;transition:background .4s}
+.si::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s}
+.si:nth-child(1)::before{background:var(--blue)}
+.si:nth-child(2)::before{background:var(--red)}
+.si:nth-child(3)::before{background:var(--pur)}
+.si:nth-child(4)::before{background:var(--yel)}
+.si:hover::before{opacity:1}
+.si-i{position:relative;z-index:1}
+.si-n{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:rgba(234,234,230,.07);line-height:1;transition:color .4s}
+.si:hover .si-n{color:rgba(255,255,255,.12)}
+.si-t{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.2vw,34px);font-weight:300;color:rgba(234,234,230,.9);letter-spacing:-.3px;margin-top:14px;transition:color .4s}
+.si:nth-child(4):hover .si-t{color:var(--dark)}
+.si-d{font-size:13px;font-weight:300;line-height:1.8;color:rgba(234,234,230,.0);max-width:360px;margin-top:14px;transition:color .4s,opacity .4s;max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.23,1,.32,1),color .4s}
+.si:hover .si-d{max-height:80px;color:rgba(255,255,255,.55)}
+.si:nth-child(4):hover .si-d{color:rgba(10,10,10,.55)}
+
+/* ── ESTUDIO ────────────────────────────────────── */
+#estudio{background:var(--dark);padding:96px 48px;border-top:1px solid rgba(234,234,230,.06)}
+.est-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:48px}
+.est-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4.5vw,58px);font-weight:300;letter-spacing:-1.5px;color:rgba(234,234,230,.9);line-height:1.1;margin-bottom:28px}
+.est-title em{font-style:italic;color:rgba(234,234,230,.3)}
+.est-text p{font-size:15px;font-weight:300;line-height:1.85;color:rgba(234,234,230,.45);margin-bottom:16px}
+.est-text strong{color:rgba(234,234,230,.8);font-weight:400}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px;padding-top:32px;border-top:1px solid rgba(234,234,230,.08)}
+.sn{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;line-height:1;letter-spacing:-2px;color:rgba(234,234,230,.9)}
+.sl{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.3);margin-top:6px}
+.est-photo{overflow:hidden}
+.est-photo img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transform:scale(1.1);will-change:transform;background:#1a1a1a}
+
+/* ── CONTACTO ───────────────────────────────────── */
+#contacto{background:var(--dark);padding:96px 48px 112px;border-top:1px solid rgba(234,234,230,.06);position:relative;overflow:hidden}
+#contacto::before{content:'LV';position:absolute;font-family:'Cormorant Garamond',serif;font-size:26vw;font-weight:300;color:rgba(234,234,230,.02);right:-2vw;bottom:-4vw;line-height:1;pointer-events:none;letter-spacing:-6px}
+.ct-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(234,234,230,.25)}
+.ct-title{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,8vw,108px);font-weight:300;letter-spacing:-3px;line-height:.88;color:rgba(234,234,230,.9);margin:14px 0 56px}
+.ct-title em{font-style:italic;color:rgba(234,234,230,.3)}
+.ct-body{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:48px}
+.ct-links{display:flex;flex-direction:column;gap:14px}
+.cl{display:flex;align-items:center;gap:14px;color:rgba(234,234,230,.4);text-decoration:none;font-size:13px;letter-spacing:.3px;transition:color .2s;cursor:none}
+.cl:hover{color:rgba(234,234,230,.9)}
+.cl-ico{width:36px;height:36px;border:1px solid rgba(234,234,230,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .2s}
+.cl:hover .cl-ico{border-color:var(--iso)}
+.mag-btn{display:inline-flex;align-items:center;justify-content:center;padding:18px 52px;border:1px solid rgba(234,234,230,.18);color:rgba(234,234,230,.9);text-decoration:none;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;cursor:none;transition:background .25s,border-color .25s;will-change:transform}
+.mag-btn:hover{background:var(--iso);border-color:var(--iso)}
+
+/* ── FOOTER ─────────────────────────────────────── */
+footer{background:#040404;padding:24px 48px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid rgba(234,234,230,.04)}
+.fl{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:400;letter-spacing:5px;text-transform:uppercase;color:rgba(234,234,230,.2)}
+.fc{font-size:11px;color:rgba(234,234,230,.12)}
+.fi a{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(234,234,230,.2);text-decoration:none;transition:color .2s;cursor:none}
+.fi a:hover{color:rgba(234,234,230,.8)}
+
+/* ── REVEAL ─────────────────────────────────────── */
+.rvl{overflow:hidden}
+.rvl-i{transform:translateY(102%);transition:transform .8s cubic-bezier(.23,1,.32,1)}
+.rvl-i.in{transform:translateY(0)}
+.fu{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.fu.in{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media(max-width:960px){
+  nav{padding:0 28px}
+  .nav-links{display:none}.nav-ham{display:flex}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-left{padding:88px 28px 52px}
+  .hero-right{height:280px}
+  #proyectos,#servicios,#estudio,#contacto{padding-left:28px;padding-right:28px}
+  .proj-label,.proj-heading,.proj-hint{padding-left:28px;padding-right:28px}
+  #projDetail{grid-template-columns:1fr;grid-template-rows:50vh 1fr}
+  .est-grid{grid-template-columns:1fr;gap:48px}
+  .est-photo img{aspect-ratio:16/9}
+  .serv-grid{grid-template-columns:1fr}
+  .ct-body{flex-direction:column}
+  footer{padding:22px 28px}
+}
+@media(max-width:560px){
+  nav,footer{padding-left:20px;padding-right:20px}
+  .hero-left{padding:80px 20px 48px}
+  #proyectos,#servicios,#estudio,#contacto{padding-left:20px;padding-right:20px}
+  .proj-label,.proj-heading,.proj-hint{padding-left:20px;padding-right:20px}
+  .pd-info{padding:36px 24px 32px}
+  footer{flex-direction:column;text-align:center}
+}
+@media(hover:none){
+  #cd,#cr{display:none}
+  #projCanvas{cursor:pointer}
+  .si,.cl,.mag-btn,.fi a{cursor:auto}
+}
+@media(max-width:768px){
+  #projCanvas,.proj-hint{display:none}
+  #projCards{display:grid}
+  #proyectos{padding-bottom:48px}
+}
+</style>
+</head>
+<body>
+
+<div id="cd"></div>
+<div id="cr"></div>
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#inicio" class="nav-logo">LAVISUAL</a>
+  <ul class="nav-links">
+    <li><a href="#proyectos">Proyectos</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#estudio">Estudio</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <button class="nav-ham" aria-label="Menú"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-left">
+    <p class="hero-tag">Estudio de Arquitectura</p>
+    <h1 class="hero-title" id="ht">LAVISUAL</h1>
+    <div class="hero-div"></div>
+    <p class="hero-sub" id="hsub">Diseñamos espacios que dialogan con quienes los habitan</p>
+    <div class="hero-scroll" id="hscroll">Scroll</div>
+  </div>
+  <div class="hero-right">
+    <canvas id="heroCanvas"></canvas>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq" aria-hidden="true">
+  <div class="mq-track">
+    <span>Arquitectura Residencial</span><span class="sep"> · </span>
+    <span>Locales Comerciales</span><span class="sep"> · </span>
+    <span>Interiorismo</span><span class="sep"> · </span>
+    <span>Mobiliario a Medida</span><span class="sep"> · </span>
+    <span>Renders</span><span class="sep"> · </span>
+    <span>Dirección de Obra</span><span class="sep"> · </span>
+    <span>Arquitectura Residencial</span><span class="sep"> · </span>
+    <span>Locales Comerciales</span><span class="sep"> · </span>
+    <span>Interiorismo</span><span class="sep"> · </span>
+    <span>Mobiliario a Medida</span><span class="sep"> · </span>
+    <span>Renders</span><span class="sep"> · </span>
+    <span>Dirección de Obra</span><span class="sep"> · </span>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<section id="proyectos">
+  <div class="rvl"><div class="rvl-i"><p class="proj-label">Nuestro trabajo</p></div></div>
+  <div class="rvl"><div class="rvl-i"><h2 class="proj-heading">Proyectos</h2></div></div>
+  <canvas id="projCanvas"></canvas>
+  <p class="proj-hint">Hover para explorar · Click para abrir</p>
+  <div id="projCards"></div>
+</section>
+
+<!-- PROJECT DETAIL OVERLAY -->
+<div id="projDetail">
+  <div class="pd-img-wrap">
+    <img id="pdImg" src="" alt="">
+  </div>
+  <div class="pd-info">
+    <div class="pd-top">
+      <span class="pd-num" id="pdNum">01</span>
+      <span class="pd-cat" id="pdCat"></span>
+      <h2 class="pd-title" id="pdTitle"></h2>
+      <div class="pd-meta">
+        <span id="pdYear"></span>
+        <span id="pdArea"></span>
+      </div>
+      <p class="pd-desc" id="pdDesc"></p>
+    </div>
+    <div class="pd-bottom">
+      <div class="pd-nav">
+        <button class="pd-btn" id="pdPrev">← Anterior</button>
+        <button class="pd-btn" id="pdNext">Siguiente →</button>
+      </div>
+      <button class="pd-close" id="pdClose">Cerrar ✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="rvl"><div class="rvl-i"><p class="sec-label-d">Lo que hacemos</p></div></div>
+  <div class="rvl"><div class="rvl-i"><h2 class="sec-title-d">Servicios</h2></div></div>
+  <div class="serv-grid">
+    <div class="si"><div class="si-i">
+      <div class="si-n">01</div>
+      <div class="si-t">Arquitectura Residencial</div>
+      <p class="si-d">Casas y departamentos diseñados desde la identidad de quienes los habitan. Desde el anteproyecto hasta la dirección de obra.</p>
+    </div></div>
+    <div class="si"><div class="si-i">
+      <div class="si-n">02</div>
+      <div class="si-t">Locales Comerciales</div>
+      <p class="si-d">Espacios que comunican la esencia de una marca. Diseñamos experiencias a través de la arquitectura y el detalle.</p>
+    </div></div>
+    <div class="si"><div class="si-i">
+      <div class="si-n">03</div>
+      <div class="si-t">Interiorismo</div>
+      <p class="si-d">Ambientes que equilibran estética y funcionalidad. Selección de materiales, paletas y detalles que transforman cualquier espacio.</p>
+    </div></div>
+    <div class="si"><div class="si-i">
+      <div class="si-n">04</div>
+      <div class="si-t">Mobiliario a Medida</div>
+      <p class="si-d">Diseñamos y producimos muebles únicos que responden exactamente al espacio y a las necesidades de cada cliente.</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- ESTUDIO -->
+<section id="estudio">
+  <div class="rvl"><div class="rvl-i"><p class="sec-label-d">Quiénes somos</p></div></div>
+  <div class="est-grid">
+    <div class="est-text fu">
+      <h2 class="est-title">Diseño con <em>propósito</em></h2>
+      <p>En <strong>LAVISUAL</strong> creemos que la arquitectura es más que construcción — es la materialización de una forma de vivir. Cada proyecto nace de una escucha atenta.</p>
+      <p>Trabajamos en arquitectura residencial, locales comerciales, interiorismo y mobiliario a medida. Cada escala es una oportunidad de crear algo singular y duradero.</p>
+      <p>Nuestro enfoque combina <strong>rigor técnico con sensibilidad estética</strong>, buscando la síntesis entre funcionalidad, identidad y emoción.</p>
+      <div class="stats">
+        <div><div class="sn" data-target="40" data-sfx="+">0</div><div class="sl">Proyectos</div></div>
+        <div><div class="sn" data-target="5" data-sfx="+">0</div><div class="sl">Años</div></div>
+        <div><div class="sn" data-target="4" data-sfx="">0</div><div class="sl">Líneas</div></div>
+        <div><div class="sn" data-target="100" data-sfx="%">0</div><div class="sl">Propios</div></div>
+      </div>
+    </div>
+    <div class="est-photo fu">
+      <img id="paraImg" src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80" alt="Estudio LAVISUAL" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="rvl"><div class="rvl-i"><p class="ct-label">Hablemos</p></div></div>
+  <div class="rvl"><div class="rvl-i">
+    <h2 class="ct-title">¿Tenés un proyecto <em>en mente?</em></h2>
+  </div></div>
+  <div class="ct-body">
+    <div class="ct-links">
+      <a href="https://wa.me/549XXXXXXXXXX" class="cl" target="_blank" rel="noopener">
+        <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        WhatsApp
+      </a>
+      <a href="https://www.instagram.com/lavisual.arq" class="cl" target="_blank" rel="noopener">
+        <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+        @lavisual.arq
+      </a>
+      <a href="mailto:hola@lavisual.arq" class="cl">
+        <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        hola@lavisual.arq
+      </a>
+    </div>
+    <a href="mailto:hola@lavisual.arq" class="mag-btn" id="mag">Escribinos</a>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">LAVISUAL</div>
+  <div class="fc">© 2025 LAVISUAL Estudio de Arquitectura</div>
+  <div class="fi"><a href="https://www.instagram.com/lavisual.arq" target="_blank" rel="noopener">Instagram</a></div>
+</footer>
+
+<script>
+const lerp = (a,b,t) => a+(b-a)*t;
+
+// ── PROJECT DATA ──────────────────────────────────
+const PROJECTS = [
+  {name:'Muy Mucho Gauss',       cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80',  desc:''},
+  {name:'Muy Mucho Intercountry',cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=1200&q=80',  desc:''},
+  {name:'Quincho Quintas',       cat:'Residencial',  year:'', area:'', rgb:[0,97,153],    img:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',  desc:''},
+  {name:'Vivienda EJ',           cat:'Residencial',  year:'', area:'', rgb:[0,97,153],    img:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200&q=80',  desc:''},
+  {name:'3 Tomates',             cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80',  desc:''},
+  {name:'Lila Ferreyra',         cat:'Comercial',    year:'', area:'', rgb:[110,52,112],  img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80',  desc:''},
+  {name:'JUGARTE',               cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80',  desc:''},
+  {name:'Vivienda MM',           cat:'Residencial',  year:'', area:'', rgb:[0,97,153],    img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80',  desc:''},
+  {name:'Shell Cordillera',      cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=1200&q=80',  desc:''},
+  {name:'Shell Río Ceballos',    cat:'Comercial',    year:'', area:'', rgb:[199,53,49],   img:'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1200&q=80',  desc:''},
+  {name:'Oficina Voz Music',     cat:'Interiorismo', year:'', area:'', rgb:[110,52,112],  img:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80',  desc:''},
+  {name:'Vivienda AP',           cat:'Residencial',  year:'', area:'', rgb:[0,97,153],    img:'https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?w=1200&q=80',  desc:''},
+];
+
+// ── CURSOR ────────────────────────────────────────
+const cd=document.getElementById('cd'), cr=document.getElementById('cr');
+let mx=innerWidth/2, my=innerHeight/2, rx=mx, ry=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY},{passive:true});
+(function tick(){
+  rx=lerp(rx,mx,.18);ry=lerp(ry,my,.18);
+  cd.style.left=mx+'px';cd.style.top=my+'px';
+  cr.style.left=rx+'px';cr.style.top=ry+'px';
+  requestAnimationFrame(tick);
+})();
+// invert on dark sections
+const darkSecs=['proyectos','servicios','estudio','contacto'];
+function ckCursor(){
+  const cy=innerHeight/2;
+  const inv=darkSecs.some(id=>{const el=document.getElementById(id);if(!el)return false;const r=el.getBoundingClientRect();return r.top<=cy&&r.bottom>=cy});
+  cr.classList.toggle('inv',inv);cd.classList.toggle('inv',inv);
+}
+window.addEventListener('scroll',ckCursor,{passive:true});ckCursor();
+document.querySelectorAll('a,button,.si').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cr.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cr.classList.remove('big'));
+});
+
+// ── PROGRESS ─────────────────────────────────────
+const prog=document.getElementById('prog');
+window.addEventListener('scroll',()=>{prog.style.width=(scrollY/(document.body.scrollHeight-innerHeight)*100)+'%'},{passive:true});
+
+// ── ISOMETRIC CANVAS UTILS ────────────────────────
+function makeIsoCanvas(canvasId, opts) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  let W=0, H=0;
+
+  function resize(w, h) {
+    W = w; H = h;
+    canvas.width = W * devicePixelRatio;
+    canvas.height = H * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+
+  function drawCube(x, y, S, hPx, rgb, alpha) {
+    const [R,G,B] = rgb;
+    // top face
+    ctx.beginPath();
+    ctx.moveTo(x, y-hPx);
+    ctx.lineTo(x+S, y+S/2-hPx);
+    ctx.lineTo(x, y+S-hPx);
+    ctx.lineTo(x-S, y+S/2-hPx);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${R},${G},${B},${alpha})`;
+    ctx.fill();
+    ctx.strokeStyle=`rgba(255,255,255,${alpha*.25})`;
+    ctx.lineWidth=.7;
+    ctx.stroke();
+    if(hPx>1.5){
+      ctx.beginPath();
+      ctx.moveTo(x-S,y+S/2-hPx);ctx.lineTo(x,y+S-hPx);
+      ctx.lineTo(x,y+S);ctx.lineTo(x-S,y+S/2);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(${Math.floor(R*.4)},${Math.floor(G*.4)},${Math.floor(B*.4)},${alpha})`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x,y+S-hPx);ctx.lineTo(x+S,y+S/2-hPx);
+      ctx.lineTo(x+S,y+S/2);ctx.lineTo(x,y+S);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(${Math.floor(R*.6)},${Math.floor(G*.6)},${Math.floor(B*.6)},${alpha})`;
+      ctx.fill();
+    }
+  }
+
+  return { canvas, ctx, resize, drawCube, getW:()=>W, getH:()=>H };
+}
+
+// ── HERO CANVAS ───────────────────────────────────
+(function(){
+  const iso = makeIsoCanvas('heroCanvas', {});
+  const {canvas, ctx, drawCube} = iso;
+  const COLOR=[69,53,174];
+  let S=34, offX=0, offY=0, COLS=0, ROWS=0;
+  let tiles=[], mouse={x:-9999,y:-9999};
+
+  // virtual cursor for touch/no-hover devices
+  const isTouch = window.matchMedia('(hover:none)').matches;
+  let vt=0; // time accumulator for virtual path
+  let vx=0, vy=0;
+
+  function getVirtualMouse(W, H){
+    vt += 0.008;
+    // Lissajous-style path that roams the whole canvas
+    vx = W * (.5 + .42 * Math.sin(vt * 1.3 + 1.2));
+    vy = H * (.5 + .38 * Math.sin(vt * 0.9));
+    return {x: vx, y: vy};
+  }
+
+  function resize(){
+    const W=canvas.clientWidth, H=canvas.clientHeight;
+    iso.resize(W,H);
+    S=Math.max(22,Math.min(38,W/24));
+    COLS=Math.ceil(W/S)+4; ROWS=Math.ceil(H/(S/2))+4;
+    offX=W/2; offY=H*.12;
+    tiles=[];
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) tiles.push({c,r,h:0,th:0,rnd:Math.random()*.15});
+  }
+
+  function toScreen(c,r){return{x:offX+(c-r)*S,y:offY+(c+r)*S/2}}
+
+  function update(){
+    const W=iso.getW()/devicePixelRatio, H=iso.getH()/devicePixelRatio;
+    const m = isTouch ? getVirtualMouse(W, H) : mouse;
+    tiles.forEach(t=>{
+      const {x,y}=toScreen(t.c,t.r);
+      const dist=Math.hypot(m.x-x,m.y-(y+S/2));
+      const maxD=S*5;
+      t.th=dist<maxD?Math.pow(1-dist/maxD,1.8)*(.65+t.rnd):0;
+      t.h=lerp(t.h,t.th,.1);
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,iso.getW(),iso.getH());
+    const sorted=[...tiles].sort((a,b)=>(a.c+a.r)-(b.c+b.r));
+    sorted.forEach(t=>{
+      const {x,y}=toScreen(t.c,t.r);
+      const alpha=.12+(t.c+t.r)/(COLS+ROWS)*.3+t.h*.4;
+      drawCube(x,y,S,t.h*26,COLOR,Math.min(alpha,.85));
+    });
+  }
+
+  canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mouse={x:e.clientX-r.left,y:e.clientY-r.top}});
+  canvas.addEventListener('mouseleave',()=>{mouse={x:-9999,y:-9999}});
+  resize();
+  window.addEventListener('resize',resize);
+  (function loop(){update();draw();requestAnimationFrame(loop)})();
+})();
+
+// ── PROJECTS CANVAS ───────────────────────────────
+(function(){
+  const iso = makeIsoCanvas('projCanvas', {});
+  const {canvas, ctx, drawCube} = iso;
+
+  const ZSIZE=3, GAP=2, STRIDE=ZSIZE+GAP;
+  const NCOLS=4, NROWS=3;
+  const TC=STRIDE*NCOLS-GAP; // 18
+  const TR=STRIDE*NROWS-GAP; // 13
+
+  let S=38, offX=0, offY=0;
+  let tiles=[], hovProj=-1;
+  let mouse={x:-9999,y:-9999};
+  let W=0, H=0;
+
+  function getProjAt(c,r){
+    for(let zi=0;zi<NCOLS;zi++) for(let zj=0;zj<NROWS;zj++){
+      const sc=zi*STRIDE, sr=zj*STRIDE;
+      if(c>=sc&&c<sc+ZSIZE&&r>=sr&&r<sr+ZSIZE) return zj*NCOLS+zi;
+    }
+    return -1;
+  }
+
+  function resize(){
+    W=canvas.clientWidth;
+    S=Math.max(20,Math.min(38,W/42));
+    const gridH=TR*S+S*2;
+    H=Math.max(gridH+80,320);
+    canvas.style.height=H+'px';
+    iso.resize(W,H);
+    offX=W/2;
+    offY=H*.06+S;
+
+    tiles=[];
+    for(let r=0;r<TR;r++)
+      for(let c=0;c<TC;c++)
+        tiles.push({c,r,h:0,th:0,proj:getProjAt(c,r),rnd:Math.random()*.15});
+  }
+
+  function toScreen(c,r){return{x:offX+(c-r)*S,y:offY+(c+r)*S/2}}
+
+  function screenToGrid(sx,sy){
+    const dx=sx-offX,dy=sy-offY;
+    return{c:(dx/S+dy*2/S)/2,r:(dy*2/S-dx/S)/2};
+  }
+
+  function update(){
+    const {c:mc,r:mr}=screenToGrid(mouse.x,mouse.y);
+    const fc=Math.floor(mc+.5),fr=Math.floor(mr+.5);
+    let newH=-1;
+    if(fc>=0&&fc<TC&&fr>=0&&fr<TR){
+      const t=tiles.find(t=>t.c===fc&&t.r===fr);
+      if(t&&t.proj>=0) newH=t.proj;
+    }
+    if(newH!==hovProj){
+      hovProj=newH;
+      cr.classList.toggle('project',hovProj>=0);
+    }
+    tiles.forEach(t=>{
+      const isPlatform=t.proj>=0;
+      const isHov=isPlatform&&t.proj===hovProj;
+      t.th=isHov?.75+t.rnd:(isPlatform?.06:0);
+      t.h=lerp(t.h,t.th,isHov?.14:.08);
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const sorted=[...tiles].sort((a,b)=>(a.c+a.r)-(b.c+b.r));
+
+    sorted.forEach(t=>{
+      const {x,y}=toScreen(t.c,t.r);
+      const isPlatform=t.proj>=0;
+      const isHov=isPlatform&&t.proj===hovProj;
+
+      if(isPlatform){
+        const p=PROJECTS[t.proj];
+        const alpha=isHov?.9:.22+(t.c+t.r)/(TC+TR)*.1;
+        drawCube(x,y,S,t.h*36,p.rgb,alpha);
+      } else if(t.h>.005){
+        drawCube(x,y,S,t.h*36,[25,25,25],.6);
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x,y);ctx.lineTo(x+S,y+S/2);ctx.lineTo(x,y+S);ctx.lineTo(x-S,y+S/2);
+        ctx.closePath();
+        ctx.fillStyle='rgba(255,255,255,.025)';ctx.fill();
+      }
+    });
+
+    // Draw project labels
+    PROJECTS.forEach((p,idx)=>{
+      const zi=idx%NCOLS, zj=Math.floor(idx/NCOLS);
+      const cc=zi*STRIDE+1, rc=zj*STRIDE+1;
+      const {x,y}=toScreen(cc,rc);
+      const isHov=idx===hovProj;
+      const rise=isHov?36*.75:36*.06;
+
+      ctx.font=`300 ${isHov?S*2.2:S*1.4}px 'Cormorant Garamond',serif`;
+      ctx.fillStyle=`rgba(234,234,230,${isHov?.9:.2})`;
+      ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+      ctx.fillText(String(idx+1).padStart(2,'0'),x,y-rise-S*.3);
+
+      if(isHov){
+        ctx.font=`500 ${Math.max(10,S*.38)}px 'Inter',sans-serif`;
+        ctx.fillStyle='rgba(234,234,230,.7)';
+        ctx.textBaseline='top';
+        ctx.fillText(p.name.toUpperCase(),x,y-rise+S*.2);
+        ctx.font=`400 ${Math.max(9,S*.28)}px 'Inter',sans-serif`;
+        ctx.fillStyle=`rgba(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]},.9)`;
+        ctx.fillText(p.cat.toUpperCase(),x,y-rise+S*.62);
+      }
+    });
+  }
+
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    mouse={x:e.clientX-r.left,y:e.clientY-r.top};
+  });
+  canvas.addEventListener('mouseleave',()=>{mouse={x:-9999,y:-9999};hovProj=-1;cr.classList.remove('project')});
+  canvas.addEventListener('click',()=>{if(hovProj>=0)openProject(hovProj)});
+
+  resize();
+  window.addEventListener('resize',()=>{resize()});
+  (function loop(){update();draw();requestAnimationFrame(loop)})();
+})();
+
+// ── PROJECT DETAIL ────────────────────────────────
+const detail=document.getElementById('projDetail');
+let curProj=0;
+
+function openProject(idx){
+  curProj=idx;
+  const p=PROJECTS[idx];
+  document.getElementById('pdImg').src=p.img;
+  document.getElementById('pdNum').textContent=String(idx+1).padStart(2,'0');
+  document.getElementById('pdTitle').textContent=p.name;
+  document.getElementById('pdCat').textContent=p.cat;
+  document.getElementById('pdCat').style.color=`rgb(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]})`;
+  document.getElementById('pdYear').textContent=p.year;
+  document.getElementById('pdArea').textContent=p.area;
+  document.getElementById('pdDesc').textContent=p.desc;
+  detail.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeProject(){
+  detail.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.getElementById('pdClose').addEventListener('click',closeProject);
+document.getElementById('pdPrev').addEventListener('click',()=>openProject((curProj-1+PROJECTS.length)%PROJECTS.length));
+document.getElementById('pdNext').addEventListener('click',()=>openProject((curProj+1)%PROJECTS.length));
+document.addEventListener('keydown',e=>{
+  if(!detail.classList.contains('open'))return;
+  if(e.key==='Escape')closeProject();
+  if(e.key==='ArrowLeft')openProject((curProj-1+PROJECTS.length)%PROJECTS.length);
+  if(e.key==='ArrowRight')openProject((curProj+1)%PROJECTS.length);
+});
+[document.getElementById('pdClose'),document.getElementById('pdPrev'),document.getElementById('pdNext')].forEach(el=>{
+  el.addEventListener('mouseenter',()=>cr.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cr.classList.remove('big'));
+});
+
+// ── MOBILE PROJECT CARDS ──────────────────────────
+(function(){
+  const grid = document.getElementById('projCards');
+  PROJECTS.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'pc';
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.name}" loading="lazy">
+      <div class="pc-over">
+        <div class="pc-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="pc-cat" style="color:rgb(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]})">${p.cat.toUpperCase()}</div>
+        <div class="pc-name">${p.name}</div>
+      </div>`;
+    card.addEventListener('click', () => openProject(i));
+    grid.appendChild(card);
+  });
+})();
+
+// ── HERO TEXT ─────────────────────────────────────
+const ht=document.getElementById('ht');
+ht.innerHTML=[...ht.textContent].map(c=>`<span class="ch">${c}</span>`).join('');
+window.addEventListener('load',()=>{
+  ht.querySelectorAll('.ch').forEach((c,i)=>setTimeout(()=>c.classList.add('in'),100+i*55));
+  setTimeout(()=>document.getElementById('hsub').classList.add('in'),850);
+  setTimeout(()=>document.getElementById('hscroll').classList.add('in'),1100);
+});
+
+// ── REVEALS ──────────────────────────────────────
+const rObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');rObs.unobserve(x.target)}})},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rvl-i,.fu').forEach(el=>rObs.observe(el));
+
+// ── PARALLAX ─────────────────────────────────────
+const paraImg=document.getElementById('paraImg');
+window.addEventListener('scroll',()=>{
+  const r=paraImg.parentElement.getBoundingClientRect();
+  const p=(innerHeight-r.top)/(innerHeight+r.height);
+  paraImg.style.transform=`translateY(${(p-.5)*-48}px) scale(1.1)`;
+},{passive:true});
+
+// ── COUNT UP ─────────────────────────────────────
+function countUp(el){
+  const tgt=+el.dataset.target,sfx=el.dataset.sfx||'';
+  let cur=0,inc=tgt/80;
+  const t=setInterval(()=>{cur=Math.min(cur+inc,tgt);el.textContent=Math.floor(cur)+sfx;if(cur>=tgt){el.textContent=tgt+sfx;clearInterval(t);}},16);
+}
+new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.querySelectorAll('[data-target]').forEach(countUp)})},{threshold:.3}).observe(document.querySelector('.stats'));
+
+// ── MAGNETIC ─────────────────────────────────────
+const mag=document.getElementById('mag');
+mag.addEventListener('mousemove',e=>{
+  const r=mag.getBoundingClientRect();
+  mag.style.transition='transform .15s ease,background .25s';
+  mag.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.3}px,${(e.clientY-(r.top+r.height/2))*.3}px)`;
+});
+mag.addEventListener('mouseleave',()=>{
+  mag.style.transition='transform .7s cubic-bezier(.23,1,.32,1),background .25s';
+  mag.style.transform='';
+});
+</script>
+</body>
+</html>
