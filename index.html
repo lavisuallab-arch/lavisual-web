@@ -229,9 +229,6 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
   .si,.cl,.mag-btn,.fi a{cursor:auto}
 }
 @media(max-width:768px){
-  #projCanvas,.proj-hint{display:none}
-  #projCards{display:grid}
-  #proyectos{padding-bottom:48px}
   #mobileMenu{display:flex}
 }
 </style>
@@ -588,7 +585,9 @@ function makeIsoCanvas(canvasId, opts) {
 
   function resize(){
     W=canvas.clientWidth;
-    S=Math.max(20,Math.min(38,W/42));
+    S = W < 768
+      ? Math.max(28, Math.min(40, W/12))
+      : Math.max(20, Math.min(38, W/42));
     const gridH=TR*S+S*2;
     H=Math.max(gridH+80,320);
     canvas.style.height=H+'px';
