@@ -43,8 +43,21 @@ nav{position:fixed;inset:0 0 auto 0;height:64px;display:flex;align-items:center;
 .nav-links{display:flex;gap:36px;list-style:none}
 .nav-links a{font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}
 .nav-links a:hover{color:#fff}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
-.nav-ham span{display:block;width:22px;height:1px;background:#fff}
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:600;position:relative}
+.nav-ham span{display:block;width:22px;height:1px;background:#fff;transition:transform .3s ease,opacity .3s ease}
+.nav-ham.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.nav-ham.open span:nth-child(2){opacity:0}
+.nav-ham.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+
+/* ── MOBILE MENU OVERLAY ─────────────────────────── */
+#mobileMenu{
+  display:none;position:fixed;inset:0;background:var(--dark);z-index:550;
+  flex-direction:column;align-items:center;justify-content:center;gap:40px;
+  opacity:0;transition:opacity .35s ease;
+}
+#mobileMenu.open{opacity:1}
+#mobileMenu a{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,10vw,52px);font-weight:300;letter-spacing:-1px;color:rgba(234,234,230,.85);text-decoration:none;transition:color .2s}
+#mobileMenu a:active{color:var(--iso)}
 
 /* ── HERO (light) ───────────────────────────────── */
 .hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);position:relative}
@@ -219,6 +232,7 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
   #projCanvas,.proj-hint{display:none}
   #projCards{display:grid}
   #proyectos{padding-bottom:48px}
+  #mobileMenu{display:flex}
 }
 </style>
 </head>
@@ -237,8 +251,15 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
     <li><a href="#estudio">Estudio</a></li>
     <li><a href="#contacto">Contacto</a></li>
   </ul>
-  <button class="nav-ham" aria-label="Menú"><span></span><span></span><span></span></button>
+  <button class="nav-ham" id="navHam" aria-label="Menú"><span></span><span></span><span></span></button>
 </nav>
+
+<div id="mobileMenu">
+  <a href="#proyectos">Proyectos</a>
+  <a href="#servicios">Servicios</a>
+  <a href="#estudio">Estudio</a>
+  <a href="#contacto">Contacto</a>
+</div>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
@@ -365,7 +386,7 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
   </div></div>
   <div class="ct-body">
     <div class="ct-links">
-      <a href="https://wa.me/549XXXXXXXXXX" class="cl" target="_blank" rel="noopener">
+      <a href="https://wa.me/35175357611" class="cl" target="_blank" rel="noopener">
         <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
         WhatsApp
       </a>
@@ -373,12 +394,12 @@ footer{background:#040404;padding:24px 48px;display:flex;align-items:center;just
         <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
         @lavisual.arq
       </a>
-      <a href="mailto:hola@lavisual.arq" class="cl">
+      <a href="mailto:lavisual.lab@gmail.com" class="cl">
         <div class="cl-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-        hola@lavisual.arq
+        lavisual.lab@gmail.com
       </a>
     </div>
-    <a href="mailto:hola@lavisual.arq" class="mag-btn" id="mag">Escribinos</a>
+    <a href="mailto:lavisual.lab@gmail.com" class="mag-btn" id="mag">Escribinos</a>
   </div>
 </section>
 
@@ -753,6 +774,17 @@ function countUp(el){
   const t=setInterval(()=>{cur=Math.min(cur+inc,tgt);el.textContent=Math.floor(cur)+sfx;if(cur>=tgt){el.textContent=tgt+sfx;clearInterval(t);}},16);
 }
 new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.querySelectorAll('[data-target]').forEach(countUp)})},{threshold:.3}).observe(document.querySelector('.stats'));
+
+// ── MOBILE MENU ──────────────────────────────────
+const navHam = document.getElementById('navHam');
+const mobileMenu = document.getElementById('mobileMenu');
+function toggleMenu(open){
+  navHam.classList.toggle('open', open);
+  mobileMenu.classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+navHam.addEventListener('click', () => toggleMenu(!navHam.classList.contains('open')));
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
 
 // ── MAGNETIC ─────────────────────────────────────
 const mag=document.getElementById('mag');
